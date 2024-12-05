@@ -6,6 +6,7 @@
 package com.joyzl.logger;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.time.format.DateTimeFormatter;
 
 /**
@@ -16,7 +17,7 @@ import java.time.format.DateTimeFormatter;
  */
 public final class LogSetting {
 
-	public final static Charset CHARSET = Charset.forName("UTF-8");
+	public final static Charset CHARSET = StandardCharsets.UTF_8;
 
 	public final static String INFOM = "INFOM";
 	public final static String DEBUG = "DEBUG";

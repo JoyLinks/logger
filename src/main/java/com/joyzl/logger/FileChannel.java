@@ -5,6 +5,7 @@
  */
 package com.joyzl.logger;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -51,32 +52,36 @@ public final class FileChannel extends LogTextChannel {
 	}
 
 	public FileChannel() {
-		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-			try {
-				if (outStream != null) {
-					outLock.lock();
-					try {
-						outStream.flush();
-						outStream.close();
-						outStream = null;
-					} finally {
-						outLock.unlock();
+		ShutdownHook.register(new Closeable() {
+			@Override
+			public void close() throws IOException {
+				try {
+					if (outStream != null) {
+						outLock.lock();
+						try {
+							outStream.flush();
+							outStream.close();
+							outStream = null;
+						} finally {
+							outLock.unlock();
+						}
 					}
-				}
-				if (errStream != null) {
-					errLock.lock();
-					try {
-						errStream.flush();
-						errStream.close();
-						errStream = null;
-					} finally {
-						errLock.unlock();
+					if (errStream != null) {
+						errLock.lock();
+						try {
+							errStream.flush();
+							errStream.close();
+							errStream = null;
+						} finally {
+							errLock.unlock();
+						}
 					}
+				} catch (IOException e) {
+					throw new RuntimeException(e);
 				}
-			} catch (IOException e) {
-				throw new RuntimeException(e);
+
 			}
-		}));
+		});
 	}
 
 	@Override
@@ -224,4 +229,5 @@ public final class FileChannel extends LogTextChannel {
 		} while (result == CoderResult.OVERFLOW);
 		chars.clear();
 	}
+
 }
