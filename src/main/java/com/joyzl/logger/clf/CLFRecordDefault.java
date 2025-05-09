@@ -36,7 +36,7 @@ public class CLFRecordDefault implements CLFRecord {
 	private String toTag;
 	private String callId;
 	private String cSeqMethod;
-	private int cSeqNumber;
+	private long cSeqNumber;
 	/** Request-URI */
 	private String RURI;
 	private int status;
@@ -80,11 +80,11 @@ public class CLFRecordDefault implements CLFRecord {
 	}
 
 	@Override
-	public int getCSeqNumber() {
+	public long getCSeqNumber() {
 		return cSeqNumber;
 	}
 
-	public void setCSeqNumber(int value) {
+	public void setCSeqNumber(long value) {
 		cSeqNumber = value;
 	}
 

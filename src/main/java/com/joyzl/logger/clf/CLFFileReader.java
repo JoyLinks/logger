@@ -150,7 +150,7 @@ public class CLFFileReader implements CLFCoder {
 								cSeq = 0;
 								while (cSeq < chars.limit()) {
 									if (chars.get(cSeq) == SPACE) {
-										record.setCSeqNumber(Integer.parseInt(chars, 0, cSeq, 10));
+										record.setCSeqNumber(Long.parseLong(chars, 0, cSeq, 10));
 										chars.position(cSeq + 1);
 										break;
 									}

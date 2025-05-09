@@ -45,7 +45,7 @@ public interface CLFRecord extends CLFCoder {
 	/** To TAG */
 	String getToTag();
 
-	int getCSeqNumber();
+	long getCSeqNumber();
 
 	String getCSeqMethod();
 

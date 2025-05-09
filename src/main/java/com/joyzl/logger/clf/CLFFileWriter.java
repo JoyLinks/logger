@@ -34,6 +34,12 @@ public class CLFFileWriter implements CLFCoder, Closeable {
 
 	public CLFFileWriter(File file) {
 		this.file = file;
+		if (!file.exists()) {
+			file = file.getParentFile();
+			if (file != null && !file.exists()) {
+				file.mkdirs();
+			}
+		}
 	}
 
 	/**
@@ -355,6 +361,25 @@ public class CLFFileWriter implements CLFCoder, Closeable {
 			}
 			while (decs > 0) {
 				bytes.put(digit(value / decs, 10));
+				value %= decs;
+				decs /= 10;
+			}
+		} else {
+			bytes.put(MINUS);
+		}
+	}
+
+	/**
+	 * 10进制无符号整数字符串
+	 */
+	private void putMandatory(long value) {
+		if (value > 0) {
+			long decs = 1;
+			while (value / decs > 10) {
+				decs *= 10;
+			}
+			while (decs > 0) {
+				bytes.put(digit((int) (value / decs), 10));
 				value %= decs;
 				decs /= 10;
 			}

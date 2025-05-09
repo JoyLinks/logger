@@ -6,7 +6,7 @@
 
 	<groupId>com.joyzl</groupId>
 	<artifactId>logger</artifactId>
-	<version>2.0.0</version>
+	<version>2.0.2</version>
 	<name>logger</name>
 	<description>日志</description>
 	<url>https://github.com/JoyLinks/logger</url>
@@ -29,7 +29,7 @@
 		<developer>
 			<name>ZhangXi</name>
 			<email>simon.zhang@msn.com</email>
-			<organization>中翌智联（重庆）科技有限公司</organization>
+			<organization>重庆骄智科技有限公司</organization>
 			<organizationUrl>http://www.joyzl.com</organizationUrl>
 		</developer>
 	</developers>
