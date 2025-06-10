@@ -131,6 +131,53 @@ public class LoggerBuilder {
 		return true;
 	}
 
+	public void decodeUTF8(ByteBuffer buffer) {
+		byte b;
+		int code;
+		while (buffer.hasRemaining()) {
+			b = buffer.get();
+			if ((b & 0x80) == 0) {
+				// 1字节
+				builder.append((char) b);
+			} else if ((b & 0xE0) == 0xC0) {
+				// 2字节
+				code = (b & 0x1F) << 6;
+				if (buffer.remaining() >= 1) {
+					code |= (buffer.get() & 0x3F);
+					builder.append((char) code);
+				}
+			} else if ((b & 0xF0) == 0xE0) {
+				// 3字节
+				code = (b & 0x0F) << 12;
+				if (buffer.remaining() >= 2) {
+					code |= (buffer.get() & 0x3F) << 6;
+					code |= (buffer.get() & 0x3F);
+					if (code >= 0x0001 && code <= 0xFFFF) {
+						builder.append((char) code);
+					}
+				}
+			} else if ((b & 0xF8) == 0xF0) {
+				// 4字节
+				code = (b & 0x07) << 18;
+				if (buffer.remaining() >= 3) {
+					code |= (buffer.get() & 0x3F) << 12;
+					code |= (buffer.get() & 0x3F) << 6;
+					code |= (buffer.get() & 0x3F);
+					if (code >= 0x010000 && code <= 0x10FFFF) {
+						// 处理代理对
+						int high = ((code - 0x010000) >> 10) + 0xD800;
+						int low = ((code - 0x010000) & 0x3FF) + 0xDC00;
+						builder.append((char) high);
+						builder.append((char) low);
+					}
+				}
+			} else {
+				// 非法字节，忽略或替换为替换字符 U+FFFD
+				builder.append('\uFFFD');
+			}
+		}
+	}
+
 	@Override
 	public String toString() {
 		return builder.toString();
