@@ -1,4 +1,4 @@
-package com.joyzl.logger.clf;
+package com.joyzl.logger.common;
 
 /**
  * 可选整个消息

@@ -1,79 +1,41 @@
-package com.joyzl.logger.clf;
+package com.joyzl.logger.common;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.ArrayList;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.Base64;
 import java.util.Collection;
-import java.util.List;
+
+import com.joyzl.logger.RotateFile;
 
 /**
  * CLF Encode and Decode (UTF-8)
  * 
  * @author ZhangXi 2024年12月2日
  */
-public class CLFFileReader implements CLFCoder {
+public class CommonReader implements CommonCodes {
 
 	private final CharsetDecoder decoder = StandardCharsets.UTF_8.newDecoder();
-	private final ByteBuffer bytes = ByteBuffer.allocateDirect(65536);
+	private final ByteBuffer bytes = ByteBuffer.allocateDirect(4096 * 4);
 	private final CharBuffer chars = CharBuffer.allocate(4096);
-	private final File file;
 
-	public CLFFileReader(File file) {
-		this.file = file;
+	public void read(File file, Collection<CommonRecord> records) throws IOException {
+		read(file.toPath(), records, Long.MIN_VALUE, Long.MAX_VALUE);
 	}
 
-	public List<CLFRecord> search(LocalDateTime begin, LocalDateTime end) throws IOException {
-		final List<CLFRecord> records = new ArrayList<>(128);
-		if (begin == null) {
-			if (end == null) {
-				if (file.exists()) {
-					read(file, records, Long.MIN_VALUE, Long.MAX_VALUE);
-				}
-				return records;
-			} else {
-				begin = end.minusDays(1);
-			}
-		} else if (end == null) {
-			end = begin.plusDays(1);
-		}
-
-		if (begin.isBefore(end)) {
-			long b = begin.toEpochSecond(ZoneOffset.UTC) * 1000 + begin.getNano() / 1000000;
-			long e = end.toEpochSecond(ZoneOffset.UTC) * 1000 + end.getNano() / 1000000;
-			File f;
-			do {
-				f = CLFCoder.dateFile(file, end.toLocalDate());
-				if (f.exists()) {
-					read(f, records, b, e);
-				}
-				end = end.minusDays(1);
-			} while (begin.isBefore(end));
-		}
-		return records;
+	public void read(RotateFile file, Collection<CommonRecord> records) throws IOException {
+		read(file.path(), records, file.begin(), file.end());
 	}
 
-	public List<CLFRecord> read(File file) throws IOException {
-		if (file.exists()) {
-			final List<CLFRecord> records = new ArrayList<>(128);
-			read(file, records, Long.MIN_VALUE, Long.MAX_VALUE);
-			return records;
-		}
-		return null;
-	}
-
-	private void read(File file, Collection<CLFRecord> records, long begin, long end) throws IOException {
-		try (final FileInputStream input = new FileInputStream(file);
-			final FileChannel channel = input.getChannel();) {
-			CLFRecordDefault record;
+	public void read(Path file, Collection<CommonRecord> records, long begin, long end) throws IOException {
+		CommonRecordDefault record;
+		try (final FileChannel channel = FileChannel.open(file, StandardOpenOption.READ)) {
 			while (channel.isOpen()) {
 				bytes.limit(76);
 				bytes.position(0);
@@ -132,7 +94,7 @@ public class CLFFileReader implements CLFCoder {
 							if (channel.read(bytes) == length) {
 								bytes.flip();
 
-								record = new CLFRecordDefault();
+								record = new CommonRecordDefault();
 								record.setTimestamp(timestamp);
 
 								// Flags 5Byte

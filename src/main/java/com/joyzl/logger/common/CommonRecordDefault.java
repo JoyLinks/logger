@@ -1,4 +1,4 @@
-package com.joyzl.logger.clf;
+package com.joyzl.logger.common;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +8,7 @@ import java.util.List;
  * 
  * @author ZhangXi 2024年12月2日
  */
-public class CLFRecordDefault implements CLFRecord {
+public class CommonRecordDefault implements CommonRecord {
 
 	/** Unix epoch milliseconds */
 	private long timestamp;

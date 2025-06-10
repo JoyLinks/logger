@@ -5,5 +5,6 @@
  */
 module com.joyzl.logger {
 	exports com.joyzl.logger;
-	exports com.joyzl.logger.clf;
+	exports com.joyzl.logger.access;
+	exports com.joyzl.logger.common;
 }

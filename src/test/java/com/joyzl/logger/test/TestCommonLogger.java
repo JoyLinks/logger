@@ -3,7 +3,6 @@ package com.joyzl.logger.test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.time.Instant;
@@ -15,28 +14,27 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import com.joyzl.logger.clf.CLFCoder;
-import com.joyzl.logger.clf.CLFFileReader;
-import com.joyzl.logger.clf.CLFFileWriter;
-import com.joyzl.logger.clf.CLFRecord;
-import com.joyzl.logger.clf.CLFRecordDefault;
-import com.joyzl.logger.clf.MessageBody;
-import com.joyzl.logger.clf.MessageHeader;
-import com.joyzl.logger.clf.MessageOther;
-import com.joyzl.logger.clf.OptionalField;
+import com.joyzl.logger.common.CommonCodes;
+import com.joyzl.logger.common.CommonLogger;
+import com.joyzl.logger.common.CommonRecord;
+import com.joyzl.logger.common.CommonRecordDefault;
+import com.joyzl.logger.common.MessageBody;
+import com.joyzl.logger.common.MessageHeader;
+import com.joyzl.logger.common.MessageOther;
+import com.joyzl.logger.common.OptionalField;
 
-class TestCLF {
+class TestCommonLogger {
 
 	@Test
 	void testFormat() throws IOException {
-		final CLFFileWriter writer = new CLFFileWriter(new File("access.log"));
-		final CLFRecordDefault record = new CLFRecordDefault();
+		final CommonLogger logger = new CommonLogger("common.log");
+		final CommonRecordDefault record = new CommonRecordDefault();
 		record.setTimestamp(1328821153010L);
-		record.setType(CLFCoder.REQUEST);
-		record.setRetransmission(CLFCoder.ORIGINAL);
-		record.setDirection(CLFCoder.RECEIVED);
-		record.setTransport(CLFCoder.UDP);
-		record.setEncryption(CLFCoder.UNENCRYPTED);
+		record.setType(CommonCodes.REQUEST);
+		record.setRetransmission(CommonCodes.ORIGINAL);
+		record.setDirection(CommonCodes.RECEIVED);
+		record.setTransport(CommonCodes.UDP);
+		record.setEncryption(CommonCodes.UNENCRYPTED);
 		record.setCSeqNumber(1);
 		record.setCSeqMethod("INVITE");
 		record.setStatus(0);
@@ -80,8 +78,7 @@ class TestCLF {
 		optionalField6.setValue("1877 example.com");
 		record.addOptionalField(optionalField6);
 
-		writer.write(record);
-		writer.close();
+		logger.record(record);
 
 		/*-
 		 * EXAMPLE RFC6873
@@ -102,11 +99,10 @@ class TestCLF {
 		 */
 
 		OptionalField o;
-		final CLFFileReader reader = new CLFFileReader(writer.getCurrentFile());
 		final LocalDate date = LocalDate.ofInstant(Instant.ofEpochMilli(record.getTimestamp()), ZoneOffset.UTC);
-		final List<CLFRecord> records = reader.search(date.atTime(LocalTime.MIN), date.atTime(LocalTime.MAX));
+		final List<CommonRecord> records = logger.search(date.atTime(LocalTime.MIN), date.atTime(LocalTime.MAX));
 		assertTrue(records.size() > 0);
-		for (CLFRecord r : records) {
+		for (CommonRecord r : records) {
 			assertEquals(r.getTimestamp(), record.getTimestamp());
 			assertEquals(r.getType(), record.getType());
 			assertEquals(r.getRetransmission(), record.getRetransmission());
@@ -153,5 +149,7 @@ class TestCLF {
 			assertEquals(o.getName(), optionalField6.getName());
 			assertEquals(o.getValue(), optionalField6.getValue());
 		}
+
+		logger.close();
 	}
 }
