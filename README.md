@@ -1,6 +1,7 @@
 # JOYZL logger
 
 轻量化高性能（部分）日志组件，没有任何其它依赖。
+日志字符编码固定为UTF-8。
 
 ### Logger
 
@@ -11,6 +12,12 @@
 * 自动按日期切分日志文件；
 * 支持清理过期的日志文件；
 * 全局静态无须实例化。
+
+```log
+12:41:53.883	main	INFOM	TEST
+```
+
+从左至右含义为：时间 线程名 消息类型 内容文本，前三个字段固定。
 
 ### AccessLogger
 
@@ -24,9 +31,22 @@
 日志输出格式样例：
 
 ```log
-1749550882032 18:21:22.32 80 192.168.0.1 GET /web HTTP/1.1 0 WEBDAV 0 200 0
+1749550882032 18:21:22.32 80 www.joyzl.com 192.168.0.1 GET /web HTTP/1.1 0 WEBDAV 0 200 0
 ```
+
 从左至右含义为：请求时间戳(UTC) 时间 服务器端口 客户端地址 请求方法 请求路径 协议版本 请求体字节数 服务程序 处理用时（毫秒） 响应状态 响应体字节数
+
+```java
+final AccessLogger logger = new AccessLogger("access\\acs.log");
+logger.record(new AccessRecord(){
+	// 字段值
+	public int getServerPort(){
+		return 80;
+	}
+	...
+});
+
+```
 
 ### CommonLogger
 
@@ -45,6 +65,19 @@ A000493,0053005C005E006D007D008F009E00A000BA00C700EB00F70100
 ```
 
 
+```java
+final CommonLogger logger = new CommonLogger("common\\clf.log");
+logger.record(new CommonRecord(){
+	// 字段值
+	public char getDirection(){
+		return CommonCodes.RECEIVED;
+	}
+	...
+});
+
+```
+
+
 ### 日志文件过期删除
 
 LoggerService 类提供日志过期删除功能，默认保留30天的日志文件，以防止过多的日志文件导致存储空间紧张。
@@ -54,6 +87,68 @@ LoggerService 类提供日志过期删除功能，默认保留30天的日志文�
 日志有效期为全局参数，将同时清理 Logger 、AccessLogger 和 CommonLogger 当前产生的日志；
 注意：仅能清理运行时日志实例关联输出的目录中的日志文件；
 不要将其它文件放入日志目录中，清理程序根据文件扩展名判断日志文件，以防你的文件被意外删除。
+
+```log
+LoggerCleaner c = LoggerService.clean();
+System.out.println(c);
+```
+
+### 日志配置
+
+没有默认配置文件，如果需要可以自定义配置文件，将其读取后通过日志对象设置；
+参数支持运行时设置，设置的参数将立即生效并影响之后的日志输出。
+
+```java
+// 设置日志级别 ERROR=1,INFO=2,DEBUG=3
+// 设置级别为0将不会输出任何日志，大于3的值等同于3
+Logger.setLevel(3);
+
+// 设置输出异常时的缩进
+Logger.setIndent("------------");
+
+// 设置分隔符，仅用于固定字段
+Logger.setTab('\t');
+
+// 设置换行符
+Logger.setLine('\n');
+
+// 设置控制台输出
+Logger.setConsole(true);
+
+// 设置日志目录和文件名
+// 生成日志文件：当前程序目录\log\joyzl-20250611.log
+Logger.setFile("log", "joyzl", ".log");
+
+// 生成日志文件：当前程序目录\20250611.log
+Logger.setFile("", null, ".log");
+
+// 生成日志文件：当前程序目录\20250611
+Logger.setFile("", null, null);
+
+// 如果目录为null将关闭文件输出
+Logger.setFile(null, null, null);
+
+// 设置日志输出的网络目标(UDP)
+Logger.setUDP("192.168.0.2", 8210);
+
+// 如果主机为null或端口为0将关闭网络输出
+Logger.setUDP(null, 0);
+
+// 输出日志
+Logger.info("test");
+Logger.debug("text1","text2");
+Logger.error("text1");
+Logger.error(new Exception("TEST"));
+
+
+// 设置日志过期天数
+LoggerService.setExpires(30);
+// 清理过期日志
+// 如果有 AccessLogger 和 CommonLogger 实例，其输出的日志也将被清理。
+LoggerService.clean();
+
+
+```
 
 ### 
 

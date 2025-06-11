@@ -33,6 +33,11 @@ public final class Logger {
 		LEVEL = value;
 	}
 
+	/** 日志级别 */
+	public static int getLevel() {
+		return LEVEL;
+	}
+
 	/** 缩进(异常堆栈输出时) */
 	static volatile String INDENT = "            ";
 	/** 分隔符 */
@@ -40,9 +45,14 @@ public final class Logger {
 	/** 换行符 */
 	static volatile char LINE = '\n';
 
-	/** 输出异常时的缩进 */
+	/** 设置输出异常时的缩进 */
 	public static synchronized void setIndent(String value) {
 		INDENT = value;
+	}
+
+	/** 输出异常时的缩进 */
+	public static String getIndent() {
+		return INDENT;
 	}
 
 	/** 设置分隔符 */
@@ -50,9 +60,19 @@ public final class Logger {
 		TAB = value;
 	}
 
+	/** 固定字段分隔符 */
+	public static char getTab() {
+		return TAB;
+	}
+
 	/** 设置换行符 */
 	public static synchronized void setLine(char value) {
 		LINE = value;
+	}
+
+	/** 换行符 */
+	public static char getLine() {
+		return LINE;
 	}
 
 	/** 控制台输出 */
@@ -61,6 +81,11 @@ public final class Logger {
 	/** 设置控制台输出 */
 	public static synchronized void setConsole(boolean value) {
 		CONSOLE = value;
+	}
+
+	/** 控制台输出 */
+	public static boolean isConsole() {
+		return CONSOLE;
 	}
 
 	/** 日志目录 */
@@ -77,6 +102,7 @@ public final class Logger {
 		FILE_EXTENSION = ext;
 		if (file != null) {
 			file.close();
+			file = null;
 		}
 		if (FILE_FOLDER != null) {
 			if (FILE_NAME == null || FILE_NAME.length() == 0) {
@@ -85,6 +111,21 @@ public final class Logger {
 				file = new LoggerFile(FILE_FOLDER, FILE_NAME, "-", FILE_EXTENSION);
 			}
 		}
+	}
+
+	/** 日志目录 */
+	public static String getFileFolder() {
+		return FILE_FOLDER;
+	}
+
+	/** 日志文件名 */
+	public static String getFileName() {
+		return FILE_NAME;
+	}
+
+	/** 日志文件扩展名 */
+	public static String getFileExtension() {
+		return FILE_EXTENSION;
 	}
 
 	/** UDP主机 */
@@ -98,10 +139,21 @@ public final class Logger {
 		DUP_PORT = port;
 		if (udp != null) {
 			udp.close();
+			udp = null;
 		}
 		if (host != null && port > 0) {
 			udp = new LoggerUDP(DUP_HOST, DUP_PORT);
 		}
+	}
+
+	/** 网络输出目标主机 */
+	public static String getDUPHost() {
+		return DUP_HOST;
+	}
+
+	/** 网络输出目标端口 */
+	public static int getDUPPort() {
+		return DUP_PORT;
 	}
 
 	private static volatile LoggerUDP udp;

@@ -43,6 +43,7 @@ public interface AccessRecord {
 	 * 
 	 * %t	收到请求的时间
 	 * %A	服务端口
+	 * %h	请求主机
 	 * 
 	 * %a	请求的客户端IP地址(Remote IP-address)
 	 * %r	请求的第一行
@@ -55,35 +56,39 @@ public interface AccessRecord {
 	 */
 
 	/** 服务端口 */
-	int serverPort();
+	int getServerPort();
 
 	/** 请求的客户端地址 */
-	InetSocketAddress remoteAddress();
+	InetSocketAddress getRemoteAddress();
+
+	/** 请求主机名 */
+	String getHost();
 
 	/** 请求接收时间戳 */
-	long requestTimestamp();
+	long getRequestTimestamp();
 
 	/** 请求的方法 */
-	String requestMethod();
+	String getRequestMethod();
 
 	/** 请求的资源路径 */
-	String requestURI();
+	String getRequestURI();
 
 	/** 请求的版本 */
-	String requestVersion();
+	String getRequestVersion();
 
 	/** 请求体大小 */
-	int requestBodySize();
+	int getRequestBodySize();
 
 	/** 处理程序 */
-	String servletName();
+	String getServletName();
 
 	/** 处理用时(毫秒) */
-	int servletSpend();
+	int getServletSpend();
 
 	/** 响应状态 */
-	int responseStatus();
+	int getResponseStatus();
 
 	/** 响应体大小 */
-	int responseBodySize();
+	int getResponseBodySize();
+
 }

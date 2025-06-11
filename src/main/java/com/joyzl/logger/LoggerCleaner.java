@@ -48,7 +48,7 @@ public final class LoggerCleaner {
 					@Override
 					public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 						if (t - attrs.creationTime().toMillis() > expires) {
-							if (file.endsWith(ext)) {
+							if (match(file, ext)) {
 								try {
 									Files.delete(file);
 									space += attrs.size();
@@ -71,6 +71,17 @@ public final class LoggerCleaner {
 			}
 			time += System.currentTimeMillis() - t;
 		}
+	}
+
+	private boolean match(Path file, String ext) {
+		if (ext == null || ext.length() == 0) {
+			file = file.getFileName();
+			if (file == null) {
+				return false;
+			}
+			return file.toString().indexOf('.') < 0;
+		}
+		return file.endsWith(ext);
 	}
 
 	@Override

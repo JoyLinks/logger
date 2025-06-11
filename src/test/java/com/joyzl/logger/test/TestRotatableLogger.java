@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
@@ -15,7 +17,7 @@ import com.joyzl.logger.RotateFile;
 class TestRotatableLogger {
 
 	@Test
-	void test() throws Exception {
+	void testDateTime() throws Exception {
 		final RotatableLogger logger = new RotatableLogger("", "a", "-", ".log") {
 			@Override
 			public void close() throws IOException {
@@ -64,4 +66,39 @@ class TestRotatableLogger {
 		logger.close();
 	}
 
+	@Test
+	void testDate() throws Exception {
+		final RotatableLogger logger = new RotatableLogger("", "a", "-", ".log") {
+			@Override
+			public void close() throws IOException {
+			}
+		};
+
+		Path[] files;
+		final LocalDate begin = LocalDate.parse("2007-12-03");
+		final LocalDate end = LocalDate.parse("2007-12-05");
+
+		files = logger.rotates((LocalDate) null, null);
+		assertEquals(files.length, 1);
+
+		files = logger.rotates(begin, null);
+		assertEquals(files.length, 1);
+
+		files = logger.rotates(null, end);
+		assertEquals(files.length, 1);
+
+		files = logger.rotates(begin, end);
+		assertEquals(files.length, 3);
+		assertEquals(files[0].getFileName().toString(), "a-20071203.log");
+		assertEquals(files[1].getFileName().toString(), "a-20071204.log");
+		assertEquals(files[2].getFileName().toString(), "a-20071205.log");
+
+		files = logger.rotates(end, begin);
+		assertEquals(files.length, 3);
+		assertEquals(files[0].getFileName().toString(), "a-20071203.log");
+		assertEquals(files[1].getFileName().toString(), "a-20071204.log");
+		assertEquals(files[2].getFileName().toString(), "a-20071205.log");
+
+		logger.close();
+	}
 }

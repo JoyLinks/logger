@@ -24,7 +24,7 @@ import com.joyzl.logger.RotateFile;
  * 
  * @author ZhangXi 2024年12月2日
  */
-public class CommonLogger extends RotatableLogger {
+public final class CommonLogger extends RotatableLogger {
 
 	/** 4096 UTF-8(Char MAX 4Byte) */
 	private final ByteBuffer buffer = ByteBuffer.allocateDirect(4096 * 4);

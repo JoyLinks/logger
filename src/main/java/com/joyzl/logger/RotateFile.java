@@ -24,6 +24,7 @@ public class RotateFile {
 		return file.toString();
 	}
 
+	/** 时间戳不属于当前文件范围 */
 	public boolean beyond(long timestamp) {
 		return timestamp < begin || timestamp > end;
 	}

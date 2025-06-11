@@ -35,6 +35,12 @@ public class LoggerReceiver implements Closeable {
 		}
 	}
 
+	/**
+	 * 接收字节串，重载此方法实现字节解码，默认行为解码为UTF8字符串
+	 * 
+	 * @param address 发送方地址
+	 * @param buffer 接收的字节串
+	 */
 	protected void receive(SocketAddress address, ByteBuffer buffer) {
 		final LoggerBuilder builder = LoggerBuilder.instance();
 		builder.decodeUTF8(buffer);
@@ -42,6 +48,12 @@ public class LoggerReceiver implements Closeable {
 		builder.release();
 	}
 
+	/**
+	 * 接收字符串，重载此方法实现字符串输出，默认行为输出控制台
+	 * 
+	 * @param address 发送方地址
+	 * @param chars 接收的字节串
+	 */
 	protected void receive(SocketAddress address, CharSequence chars) {
 		System.out.append(chars);
 	}

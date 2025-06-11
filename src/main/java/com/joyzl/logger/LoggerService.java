@@ -11,7 +11,7 @@ import java.util.List;
  * 
  * @author ZhangXi 2025年6月8日
  */
-public class LoggerService {
+public final class LoggerService {
 
 	/** 日志过期天数 */
 	private static volatile int EXPIRES = 30;
@@ -19,6 +19,11 @@ public class LoggerService {
 	/** 设置日志过期天数，过期日志文件将被删除 */
 	public static synchronized void setExpires(int value) {
 		EXPIRES = value;
+	}
+
+	/** 日志过期天数，过期日志文件将被删除 */
+	public static int getExpires() {
+		return EXPIRES;
 	}
 
 	private final static List<Closeable> CLOSEABLES = Collections.synchronizedList(new ArrayList<>());

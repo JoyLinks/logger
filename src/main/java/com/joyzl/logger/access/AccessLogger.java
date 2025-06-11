@@ -22,7 +22,7 @@ import com.joyzl.logger.RotateFile;
  * 
  * @author ZhangXi 2025年6月8日
  */
-public class AccessLogger extends RotatableLogger {
+public final class AccessLogger extends RotatableLogger {
 
 	final static char SPACE = ' ';
 	final static char MINUS = '-';
@@ -54,8 +54,8 @@ public class AccessLogger extends RotatableLogger {
 	 */
 	public void record(AccessRecord record) {
 		final LoggerBuilder builder = LoggerBuilder.instance();
-		builder.timestamp = record.requestTimestamp();
-		build(builder.builder(), record);
+		builder.timestamp = record.getRequestTimestamp();
+		AccessWriter.encode(builder.builder(), record);
 		writer.put(builder);
 	}
 
@@ -65,14 +65,10 @@ public class AccessLogger extends RotatableLogger {
 	public List<AccessRecord> search(LocalDateTime begin, LocalDateTime end) throws IOException {
 		final List<AccessRecord> records = new ArrayList<>();
 		final RotateFile[] files = rotates(begin, end);
-		// FileChannel channel;
+		final AccessReader reader = new AccessReader();
 		for (RotateFile file : files) {
 			if (Files.exists(file.path())) {
-				// channel = FileChannel.open(file.path(),
-				// StandardOpenOption.READ);
-				// 1749459420945 16:57:0.945 80 192.168.0.1 GET /web HTTP/1.1 0
-				// TEST(中华人民共和国) 0 200 0
-				// channel.read(null)
+				reader.read(file, records);
 			}
 		}
 		return records;
@@ -84,47 +80,11 @@ public class AccessLogger extends RotatableLogger {
 		writer.close();
 	}
 
-	/** 构造日志字符串 */
-	private void build(StringBuilder builder, AccessRecord record) {
-		builder.append(record.requestTimestamp());
-		builder.append(SPACE);
-
-		LoggerBuilder.encodeTime(builder, record.requestTimestamp());
-		builder.append(SPACE);
-
-		builder.append(record.serverPort());
-		builder.append(SPACE);
-		if (record.remoteAddress() != null) {
-			builder.append(record.remoteAddress().getHostString());
-		} else {
-			builder.append(MINUS);
-		}
-		builder.append(SPACE);
-
-		builder.append(record.requestMethod());
-		builder.append(SPACE);
-		builder.append(record.requestURI());
-		builder.append(SPACE);
-		builder.append(record.requestVersion());
-		builder.append(SPACE);
-		builder.append(record.requestBodySize());
-		builder.append(SPACE);
-
-		builder.append(record.servletName());
-		builder.append(SPACE);
-		builder.append(record.servletSpend());
-		builder.append(SPACE);
-		builder.append(record.responseStatus());
-		builder.append(SPACE);
-		builder.append(record.responseBodySize());
-		builder.append(LINE);
-	}
-
 	/** 异步写 */
 	private class AsynchronousWriter extends LoggerWriter<LoggerBuilder> {
 		/** 待写的日志记录 */
 		private final LinkedTransferQueue<LoggerBuilder> RECORDS = new LinkedTransferQueue<>();
-		private final ByteBuffer buffer = ByteBuffer.allocateDirect(65536);
+		private final ByteBuffer buffer = ByteBuffer.allocateDirect(1024);
 		private RotateFile file = RotateFile.EMPTY;
 		private volatile boolean end;
 
@@ -161,32 +121,27 @@ public class AccessLogger extends RotatableLogger {
 								StandardOpenOption.APPEND);
 						}
 
+						buffer.clear();
 						while (true) {
 							if (builder.encodeUTF8(buffer)) {
 								builder.release();
+								buffer.flip();
+								while (buffer.hasRemaining()) {
+									channel.write(buffer);
+								}
 								break;
 							} else {
 								buffer.flip();
 								while (buffer.hasRemaining()) {
 									channel.write(buffer);
 								}
-								channel.force(false);
-								buffer.clear();
 							}
 						}
 
 						// NEXT
 						builder = RECORDS.poll();
 					} while (builder != null);
-
-					if (buffer.position() > 0) {
-						buffer.flip();
-						while (buffer.hasRemaining()) {
-							channel.write(buffer);
-						}
-						channel.force(false);
-						buffer.clear();
-					}
+					channel.force(false);
 				} catch (InterruptedException e) {
 					end = true;
 					return;
@@ -212,7 +167,7 @@ public class AccessLogger extends RotatableLogger {
 
 			if (file != RotateFile.EMPTY) {
 				FileChannel channel = null;
-				// TODO 此判断有概率误判全空的缓存
+
 				if (buffer.hasRemaining()) {
 					channel = FileChannel.open(file.path(), //
 						StandardOpenOption.WRITE, //
@@ -221,7 +176,6 @@ public class AccessLogger extends RotatableLogger {
 						channel.write(buffer);
 					}
 					channel.force(false);
-					buffer.clear();
 				}
 				LoggerBuilder builder = RECORDS.poll();
 				while (builder != null) {
@@ -237,21 +191,23 @@ public class AccessLogger extends RotatableLogger {
 							StandardOpenOption.WRITE, //
 							StandardOpenOption.APPEND);
 					}
+
+					buffer.clear();
 					while (true) {
 						if (builder.encodeUTF8(buffer)) {
+							builder.release();
 							buffer.flip();
 							while (buffer.hasRemaining()) {
 								channel.write(buffer);
 							}
-							buffer.clear();
 							break;
+						} else {
+							buffer.flip();
+							while (buffer.hasRemaining()) {
+								channel.write(buffer);
+							}
 						}
 					}
-					buffer.flip();
-					while (buffer.hasRemaining()) {
-						channel.write(buffer);
-					}
-					buffer.clear();
 
 					// NEXT
 					builder = RECORDS.poll();
