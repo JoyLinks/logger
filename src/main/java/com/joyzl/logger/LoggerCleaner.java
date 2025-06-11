@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Collections;
 
 /**
  * 清理超过指定时间的日志文件
@@ -44,7 +45,7 @@ public final class LoggerCleaner {
 		if (Files.exists(dir)) {
 			long t = System.currentTimeMillis();
 			try {
-				Files.walkFileTree(dir, new SimpleFileVisitor<>() {
+				Files.walkFileTree(dir, Collections.emptySet(), 1, new SimpleFileVisitor<>() {
 					@Override
 					public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 						if (t - attrs.creationTime().toMillis() > expires) {
@@ -74,14 +75,14 @@ public final class LoggerCleaner {
 	}
 
 	private boolean match(Path file, String ext) {
+		file = file.getFileName();
+		if (file == null) {
+			return false;
+		}
 		if (ext == null || ext.length() == 0) {
-			file = file.getFileName();
-			if (file == null) {
-				return false;
-			}
 			return file.toString().indexOf('.') < 0;
 		}
-		return file.endsWith(ext);
+		return file.toString().endsWith(ext);
 	}
 
 	@Override

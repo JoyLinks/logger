@@ -20,7 +20,7 @@ public class AccessWriter implements AccessCodes {
 		builder.append(record.getServerPort());
 		builder.append(SPACE);
 
-		if (record.getHost() == null) {
+		if (record.getHost() != null) {
 			builder.append(record.getHost());
 		} else {
 			builder.append(MINUS);
@@ -36,19 +36,29 @@ public class AccessWriter implements AccessCodes {
 
 		builder.append(record.getRequestMethod());
 		builder.append(SPACE);
+
 		builder.append(record.getRequestURI());
 		builder.append(SPACE);
+
 		builder.append(record.getRequestVersion());
 		builder.append(SPACE);
+
 		builder.append(record.getRequestBodySize());
 		builder.append(SPACE);
 
-		builder.append(record.getServletName());
+		if (record.getServletName() != null) {
+			builder.append(record.getServletName());
+		} else {
+			builder.append(MINUS);
+		}
 		builder.append(SPACE);
+
 		builder.append(record.getServletSpend());
 		builder.append(SPACE);
+
 		builder.append(record.getResponseStatus());
 		builder.append(SPACE);
+
 		builder.append(record.getResponseBodySize());
 		builder.append(LINE);
 	}

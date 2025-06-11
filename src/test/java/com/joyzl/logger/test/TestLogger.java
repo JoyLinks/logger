@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.junit.jupiter.api.Test;
 
 import com.joyzl.logger.Logger;
+import com.joyzl.logger.LoggerCleaner;
 import com.joyzl.logger.LoggerService;
 
 class TestLogger {
@@ -27,8 +28,10 @@ class TestLogger {
 		Logger.setFile("", null, ".log");
 		Logger.info("没有文件名");
 
+		Logger.setFile("log", null, ".log");
 		LoggerService.setExpires(0);
-		LoggerService.clean();
+		LoggerCleaner c = LoggerService.clean();
+		System.out.print(c);
 	}
 
 }
