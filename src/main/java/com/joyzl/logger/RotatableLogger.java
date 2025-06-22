@@ -1,3 +1,7 @@
+/*
+ * Copyright © 2017-2025 重庆骄智科技有限公司.
+ * 本软件根据 Apache License 2.0 开源，详见 LICENSE 文件。
+ */
 package com.joyzl.logger;
 
 import java.io.Closeable;
@@ -82,7 +86,7 @@ public abstract class RotatableLogger implements Closeable {
 	public RotateFile rotate(long timestamp) {
 		// 轮换日志文件，将同一天的日志写入相同文件
 		final Instant instant = Instant.ofEpochMilli(timestamp);
-		final LocalDate date = LocalDate.ofInstant(instant, ZoneOffset.UTC);
+		final LocalDate date = LocalDate.ofInstant(instant, ZoneOffset.systemDefault());
 		long begin = date.toEpochSecond(LocalTime.MIN, ZoneOffset.UTC) * 1000;
 		long end = date.toEpochSecond(LocalTime.MAX, ZoneOffset.UTC) * 1000 + 999;
 		return new RotateFile(resolve(date), begin, end);

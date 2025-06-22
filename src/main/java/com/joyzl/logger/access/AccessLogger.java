@@ -1,3 +1,7 @@
+/*
+ * Copyright © 2017-2025 重庆骄智科技有限公司.
+ * 本软件根据 Apache License 2.0 开源，详见 LICENSE 文件。
+ */
 package com.joyzl.logger.access;
 
 import java.io.IOException;
@@ -22,11 +26,7 @@ import com.joyzl.logger.RotateFile;
  * 
  * @author ZhangXi 2025年6月8日
  */
-public final class AccessLogger extends RotatableLogger {
-
-	final static char SPACE = ' ';
-	final static char MINUS = '-';
-	final static char LINE = '\n';
+public final class AccessLogger extends RotatableLogger implements AccessCodes {
 
 	private final AsynchronousWriter writer;
 
