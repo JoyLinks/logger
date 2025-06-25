@@ -47,7 +47,7 @@ public final class CommonLogger extends RotatableLogger {
 	 * [Name][Split]20241202[Extension]
 	 */
 	public CommonLogger(String file, final String n, final String s, final String e) throws IOException {
-		super(file, "clf", "-", ".log");
+		super(file, n, s, e);
 		LoggerService.register(this);
 	}
 

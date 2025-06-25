@@ -87,8 +87,9 @@ public abstract class RotatableLogger implements Closeable {
 		// 轮换日志文件，将同一天的日志写入相同文件
 		final Instant instant = Instant.ofEpochMilli(timestamp);
 		final LocalDate date = LocalDate.ofInstant(instant, ZoneOffset.systemDefault());
-		long begin = date.toEpochSecond(LocalTime.MIN, ZoneOffset.UTC) * 1000;
-		long end = date.toEpochSecond(LocalTime.MAX, ZoneOffset.UTC) * 1000 + 999;
+		final ZoneOffset OFFSET = ZoneOffset.systemDefault().getRules().getOffset(Instant.now());
+		long begin = date.toEpochSecond(LocalTime.MIN, OFFSET) * 1000;
+		long end = date.toEpochSecond(LocalTime.MAX, OFFSET) * 1000 + 999;
 		return new RotateFile(resolve(date), begin, end);
 	}
 
@@ -133,6 +134,8 @@ public abstract class RotatableLogger implements Closeable {
 	 * 获取指定范围的文件，未检查文件是否存在
 	 */
 	public RotateFile[] rotates(LocalDateTime begin, LocalDateTime end) {
+		final ZoneOffset OFFSET = ZoneOffset.systemDefault().getRules().getOffset(Instant.now());
+
 		Path file;
 		long b, e;
 		if (begin == null) {
@@ -142,14 +145,14 @@ public abstract class RotatableLogger implements Closeable {
 			} else {
 				// 仅结束天
 				file = resolve(end);
-				e = end.toInstant(ZoneOffset.UTC).toEpochMilli();
+				e = end.toInstant(OFFSET).toEpochMilli();
 				b = e - (e % LoggerBuilder.DAY_MILLISECOND);
 				return new RotateFile[] { new RotateFile(file, b, e) };
 			}
 		} else if (end == null) {
 			// 仅开始天
 			file = resolve(begin);
-			b = begin.toInstant(ZoneOffset.UTC).toEpochMilli();
+			b = begin.toInstant(OFFSET).toEpochMilli();
 			e = b + (LoggerBuilder.DAY_MILLISECOND - (b % LoggerBuilder.DAY_MILLISECOND));
 			return new RotateFile[] { new RotateFile(file, b, e) };
 		}
@@ -160,29 +163,29 @@ public abstract class RotatableLogger implements Closeable {
 			days = 0;
 			// FIRST
 			file = resolve(begin);
-			b = begin.toInstant(ZoneOffset.UTC).toEpochMilli();
+			b = begin.toInstant(OFFSET).toEpochMilli();
 			e = b + (LoggerBuilder.DAY_MILLISECOND - (b % LoggerBuilder.DAY_MILLISECOND));
 			files[days++] = new RotateFile(file, b, e);
 
 			LocalDate date = begin.toLocalDate().plusDays(1);
 			for (; days < files.length - 1; days++) {
 				file = resolve(date);
-				b = LocalDateTime.of(date, LocalTime.MIN).toInstant(ZoneOffset.UTC).toEpochMilli();
-				b = LocalDateTime.of(date, LocalTime.MAX).toInstant(ZoneOffset.UTC).toEpochMilli();
+				b = LocalDateTime.of(date, LocalTime.MIN).toInstant(OFFSET).toEpochMilli();
+				b = LocalDateTime.of(date, LocalTime.MAX).toInstant(OFFSET).toEpochMilli();
 				files[days] = new RotateFile(file, b, e);
 			}
 
 			// LAST
 			file = resolve(end);
-			e = end.toInstant(ZoneOffset.UTC).toEpochMilli();
+			e = end.toInstant(OFFSET).toEpochMilli();
 			b = e - (e % LoggerBuilder.DAY_MILLISECOND);
 			files[days] = new RotateFile(file, b, e);
 
 			return files;
 		} else {
 			file = resolve(begin);
-			b = begin.toInstant(ZoneOffset.UTC).toEpochMilli();
-			e = end.toInstant(ZoneOffset.UTC).toEpochMilli();
+			b = begin.toInstant(OFFSET).toEpochMilli();
+			e = end.toInstant(OFFSET).toEpochMilli();
 			return new RotateFile[] { new RotateFile(file, b, e) };
 		}
 	}

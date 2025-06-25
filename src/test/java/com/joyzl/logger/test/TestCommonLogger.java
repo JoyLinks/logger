@@ -103,7 +103,7 @@ class TestCommonLogger {
 		 */
 
 		OptionalField o;
-		final LocalDate date = LocalDate.ofInstant(Instant.ofEpochMilli(record.getTimestamp()), ZoneOffset.UTC);
+		final LocalDate date = LocalDate.ofInstant(Instant.ofEpochMilli(record.getTimestamp()), ZoneOffset.systemDefault());
 		final List<CommonRecord> records = logger.search(date.atTime(LocalTime.MIN), date.atTime(LocalTime.MAX));
 		assertTrue(records.size() > 0);
 		for (CommonRecord r : records) {
@@ -156,4 +156,5 @@ class TestCommonLogger {
 
 		logger.close();
 	}
+
 }
