@@ -35,14 +35,14 @@ public class LoggerFile extends RotatableLogger {
 		while (buffer.hasRemaining()) {
 			channel.write(buffer);
 		}
-		channel.force(false);
+		// channel.force(false);
 	}
 
 	@Override
 	public void close() throws IOException {
 		LoggerService.remove(this);
 		if (channel != null && channel.isOpen()) {
-			channel.force(false);
+			channel.force(true);
 			channel.close();
 		}
 	}
