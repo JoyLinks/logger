@@ -291,6 +291,7 @@ public final class Logger {
 				builder.append(':');
 				builder.append(exception.getMessage());
 			}
+			builder.append(LINE);
 
 			StackTraceElement trace;
 			final StackTraceElement[] traces = exception.getStackTrace();
