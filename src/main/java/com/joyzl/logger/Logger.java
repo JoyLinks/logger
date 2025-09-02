@@ -158,14 +158,18 @@ public final class Logger {
 	private static volatile LoggerUDP udp;
 	private static volatile LoggerFile file;
 
-	static {
-		try {
-			setFile(FILE_FOLDER, FILE_NAME, FILE_EXTENSION);
-			setUDP(DUP_HOST, DUP_PORT);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
+	// static {
+	// 20250902
+	// Linux 部署需要将日志输出到 /var/log/xxx
+	// 程序位于 /opt/xxx 默认没有写入权限
+	// 因此默认在程序目录创建 log 文件夹将失败
+	// try {
+	// setFile(FILE_FOLDER, FILE_NAME, FILE_EXTENSION);
+	// setUDP(DUP_HOST, DUP_PORT);
+	// } catch (IOException e) {
+	// throw new RuntimeException(e);
+	// }
+	// }
 
 	private Logger() {
 		// 不要实例
