@@ -31,11 +31,12 @@ public class LoggerFile extends RotatableLogger {
 				StandardOpenOption.WRITE, //
 				StandardOpenOption.APPEND);
 		}
-
-		while (buffer.hasRemaining()) {
-			channel.write(buffer);
+		if (channel.isOpen()) {
+			while (buffer.hasRemaining()) {
+				channel.write(buffer);
+			}
+			// channel.force(false);
 		}
-		// channel.force(false);
 	}
 
 	@Override
