@@ -21,7 +21,7 @@ import java.util.Collections;
 public final class LoggerCleaner {
 
 	/** 过期天数的毫秒值 */
-	private final int expires;
+	private final long expires;
 	/** 释放空间(Byte) */
 	private long space;
 	/** 清理文件数 */
@@ -30,7 +30,7 @@ public final class LoggerCleaner {
 	private long time;
 
 	public LoggerCleaner(int dayExpires) {
-		expires = dayExpires * LoggerBuilder.DAY_MILLISECOND;
+		expires = 1L * dayExpires * LoggerBuilder.DAY_MILLISECOND;
 		space = 0;
 		files = 0;
 		time = 0;
@@ -93,7 +93,7 @@ public final class LoggerCleaner {
 	 * 获取应清理的过期天数
 	 */
 	public int getDayExpires() {
-		return expires / LoggerBuilder.DAY_MILLISECOND;
+		return (int) (expires / LoggerBuilder.DAY_MILLISECOND);
 	}
 
 	/**
